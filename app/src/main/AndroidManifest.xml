@@ -21,6 +21,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="com.android.vending.BILLING"/>
+    <uses-permission android:name="com.sec.android.app.clockpackage.permission.READ_ALARM"/>
+    <uses-permission android:name="com.sec.android.app.clockpackage.permission.WRITE_ALARM"/>
+    <uses-permission android:name='android.permission.WAKE_LOCK'/>
+
 
     <uses-feature android:name="android.hardware.telephony" android:required="false"/>
 

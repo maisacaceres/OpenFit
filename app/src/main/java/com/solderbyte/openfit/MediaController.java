@@ -3,11 +3,13 @@ package com.solderbyte.openfit;
 import com.solderbyte.openfit.util.OpenFitIntent;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.util.Log;
+import android.view.KeyEvent;
 
 public class MediaController {
     private static final String LOG_TAG = "OpenFit:MediaController";
@@ -236,7 +238,10 @@ public class MediaController {
             i.putExtra("command", "togglepause");
         }
         else if(CURRENT_PLAYER == 1) {
-            i = new Intent("com.spotify.mobile.android.ui.widget.PLAY");
+            i = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            i.setComponent(new ComponentName("com.spotify.music", "com.spotify.music.internal.receiver.MediaButtonReceiver"));
+            i.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
+            i.putExtra(Intent.EXTRA_KEY_EVENT,new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
         }
 
         return i;

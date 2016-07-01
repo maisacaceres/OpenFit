@@ -132,7 +132,7 @@ public class OpenFitNotificationProtocol {
         return oDatacomposer.toByteArray();
     }
 
-    public static byte[] createAlarmProtocol(int msgType, long msgId, List<OpenFitDataTypeAndString> msgData, long timeStamp) {
+    public static byte[] createAlarmProtocol(int msgType, long msgId, List<OpenFitDataTypeAndString> msgData, long timeStamp, int snooze) {
         OpenFitVariableDataComposer oDatacomposer = new OpenFitVariableDataComposer();
         oDatacomposer.writeByte((byte)msgType);
         oDatacomposer.writeLong(msgId);
@@ -156,7 +156,7 @@ public class OpenFitNotificationProtocol {
 
         oDatacomposer.writeInt((int) timeStamp);
         // snooze or dissmiss
-        oDatacomposer.writeInt(0);
+        oDatacomposer.writeInt(snooze);
         return oDatacomposer.toByteArray();
     }
 

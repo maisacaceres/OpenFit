@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -42,7 +43,7 @@ import android.widget.Toast;
 
 @SuppressLint("HandlerLeak")
 public class OpenFitService extends Service {
-    private static final String LOG_TAG = "OpenFit:OpenFitService";
+    private static final String LOG_TAG = "OpenFit.OpenFitService";
 
     private OpenFitSavedPreferences oPrefs;
     private ApplicationManager appManager;
@@ -452,10 +453,10 @@ public class OpenFitService extends Service {
             sendMediaRes();
         }
         if(Arrays.equals(data, OpenFitApi.getOpenAlarmCleared())) {
-            //DismissAlarm();
+            stopAlarm();
         }
         if(Arrays.equals(data, OpenFitApi.getOpenAlarmSnoozed())) {
-            //snoozeAlarm();
+            snoozeAlarm();
         }
         if(OpenFitApi.byteArrayToHexString(data).contains(OpenFitApi.byteArrayToHexString(OpenFitApi.getOpenRejectCall()))) {
             endCall();
@@ -744,6 +745,7 @@ public class OpenFitService extends Service {
         gFit = new GoogleFit(this);
     }
 
+    //Fitness
     public void startFitnessSync(ArrayList<PedometerData> pedometerList, ArrayList<ExerciseData> exerciseList, ArrayList<SleepData> sleepList, ArrayList<SleepInfo> sleepInfoList, ArrayList<HeartRateData> heartRateList, ProfileData pData) {
         Log.d(LOG_TAG, "startFitnessSync");
         if(gFit != null) {
@@ -833,6 +835,7 @@ public class OpenFitService extends Service {
         Log.d(LOG_TAG, "Running");
     }
 
+    //Media
     public void sendMediaTrack() {
         byte[] bytes = OpenFitApi.getOpenMediaTrack(MediaController.getTrack());
         sendBluetoothBytes(bytes);
@@ -1018,15 +1021,27 @@ public class OpenFitService extends Service {
         return contactName;
     }
 
-    public void sendAlarmStart() {
+    public void sendAlarmStart(int snooze) {
         long id = (long)(System.currentTimeMillis() / 1000L);
-        byte[] bytes = OpenFitApi.getOpenAlarm(id);
+        Log.d(LOG_TAG, "start sinal:" + id);
+        byte[] bytes = OpenFitApi.getOpenAlarm(id, snooze);
         sendBluetoothBytes(bytes);
     }
 
     public void sendAlarmStop() {
+        Log.d(LOG_TAG, "send Alarm Stop");
         byte[] bytes = OpenFitApi.getOpenAlarmClear();
         sendBluetoothBytes(bytes);
+    }
+
+    public void snoozeAlarm() {
+        Log.d(LOG_TAG, "Snoozing alarm");
+        sendBroadcast(Alarm.snoozeAlarm(), null);
+    }
+
+    public void stopAlarm() {
+        Log.d(LOG_TAG, "Stopping alarm");
+        sendBroadcast(Alarm.dismissAlarm(), null);
     }
 
     public void sendWeatherNotifcation(String weather, String icon) {
@@ -1071,19 +1086,6 @@ public class OpenFitService extends Service {
             Weather.getWeather(query, location);
         }
     }
-
-    // Does not work
-    /*public void snoozeAlarm() {
-        Log.d(LOG_TAG, "Snoozing alarm");
-        Intent intent = Alarm.snoozeAlarm();
-        sendBroadcast(intent);
-    }
-
-    public void DismissAlarm() {
-        Log.d(LOG_TAG, "Dismissing alarm");
-        Intent intent = Alarm.dismissAlarm();
-        sendBroadcast(intent);
-    }*/
 
     private BroadcastReceiver serviceStopReceiver = new BroadcastReceiver() {
         @Override
@@ -1224,15 +1226,25 @@ public class OpenFitService extends Service {
     private BroadcastReceiver alarmReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = Alarm.getAction(intent);
+            int alertAlarmId = 0;
+
+            Log.d(LOG_TAG, "OnRecive:"+ intent.getAction());
+
+            if (intent.getAction().equals("com.samsung.sec.android.clockpackage.alarm.ALARM_STARTED_IN_ALERT")) {
+                alertAlarmId = intent.getIntExtra("alertAlarmID", 0);
+                Log.d(LOG_TAG, "ID ALARM " + alertAlarmId);
+            }
+
+            String action = Alarm.getAction(intent, context, alertAlarmId);
             Log.d(LOG_TAG, "Alarm Action: " + action);
-            if(action.equals("START")) {
-                sendAlarmStart();
+
+            if(action.equals("STARTSNOOZE")) {
+                sendAlarmStart(1);
             }
-            else if(action.equals("SNOOZE")) {
-                sendAlarmStop();
+            else if (action.equals("START")) {
+                sendAlarmStart(0);
             }
-            else if(action.equals("STOP")) {
+            else if(action.equals("STOP") || action.equals("SNOOZE")) {
                 sendAlarmStop();
             }
         }

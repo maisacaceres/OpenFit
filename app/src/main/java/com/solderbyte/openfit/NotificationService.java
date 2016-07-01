@@ -1,6 +1,8 @@
 package com.solderbyte.openfit;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Random;
 
 import com.solderbyte.openfit.util.OpenFitIntent;
 
@@ -60,11 +62,12 @@ public class NotificationService extends NotificationListenerService {
             ticker = (String) sbn.getNotification().tickerText;
         }
         catch(Exception e) {
-            Log.d(LOG_TAG, "Notification does not have tickerText");
+            Log.d(LOG_TAG, "Notification does't have tickerText");
         }
         String tag = sbn.getTag();
         long time = sbn.getPostTime();
-        int id = sbn.getId();
+        //int id = sbn.getId();
+        int id = new Random().nextInt();
 
         if(extras.getCharSequence("android.title") != null) {
             title = extras.getString("android.title");

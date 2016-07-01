@@ -660,7 +660,7 @@ public class OpenFitApi {
         return oDatacomposer.toByteArray();
     }
 
-    public static byte[] getOpenAlarm(long id) {
+    public static byte[] getOpenAlarm(long id, int snooze) {
         //0a
         //1e000000 = size of mg
         //01 = msg type
@@ -680,7 +680,7 @@ public class OpenFitApi {
         String timeString = Integer.toString(hour)+Integer.toString(minute);
         int time = Integer.parseInt(timeString);
 
-        byte[] msg = OpenFitNotificationProtocol.createAlarmProtocol(OpenFitData.DATA_TYPE_ALARMCLOCK, id, mDataList, time);
+        byte[] msg = OpenFitNotificationProtocol.createAlarmProtocol(OpenFitData.DATA_TYPE_ALARMCLOCK, id, mDataList, time, snooze);
 
         OpenFitVariableDataComposer oDatacomposer = new OpenFitVariableDataComposer();
         oDatacomposer.writeByte((byte)10);
